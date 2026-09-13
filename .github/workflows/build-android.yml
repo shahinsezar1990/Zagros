@@ -1,0 +1,49 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: دریافت کد پروژه
+        uses: actions/checkout@v4
+
+      - name: باز کردن فایل زیپ پروژه
+        run: |
+          ZIPFILE=$(find . -maxdepth 1 -iname "*.zip" | head -n 1)
+          if [ -n "$ZIPFILE" ]; then
+            echo "در حال استخراج $ZIPFILE ..."
+            unzip -oq "$ZIPFILE" -d _extracted
+            INNER_DIR=$(find _extracted -mindepth 1 -maxdepth 1 -type d | head -n 1)
+            if [ -n "$INNER_DIR" ] && [ "$(find _extracted -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]; then
+              shopt -s dotglob
+              mv "$INNER_DIR"/* .
+            else
+              shopt -s dotglob
+              mv _extracted/* .
+            fi
+            rm -rf _extracted
+          fi
+
+      - name: آماده‌سازی Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: نصب وابستگی‌ها
+        run: npm install
+
+      - name: اتصال به Expo/EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: ساخت فایل APK اندروید
+        run: eas build --platform android --profile preview --non-interactive --no-wait
+        env:
+          EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
