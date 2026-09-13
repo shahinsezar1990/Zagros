@@ -43,6 +43,11 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
+      - name: تنظیم پروژه Expo
+        run: npx eas-cli init --account zagros-yaragh --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
       - name: ساخت فایل APK اندروید
         run: eas build --platform android --profile preview --non-interactive --no-wait
         env:
