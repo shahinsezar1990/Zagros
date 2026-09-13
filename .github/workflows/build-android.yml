@@ -20,11 +20,9 @@ jobs:
             unzip -oq "$ZIPFILE" -d _extracted
             INNER_DIR=$(find _extracted -mindepth 1 -maxdepth 1 -type d | head -n 1)
             if [ -n "$INNER_DIR" ] && [ "$(find _extracted -mindepth 1 -maxdepth 1 | wc -l)" -eq 1 ]; then
-              shopt -s dotglob
-              mv "$INNER_DIR"/* .
+              cp -a "$INNER_DIR"/. .
             else
-              shopt -s dotglob
-              mv _extracted/* .
+              cp -a _extracted/. .
             fi
             rm -rf _extracted
           fi
